@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
 // })->middleware('auth:sanctum');
+Route::get('/test', function () {
+    return view('test');
+});
 
 Route::apiResource('Users', UserController::class);
 Route::get('/',[AuthController::class,'index']);
@@ -30,9 +33,12 @@ Route::post('resetpass',[UserController::class,'resetPassword']);
 
 Route::get('/getItemsByCategory', [ItemController::class, 'getItemsByCategory'])->name('getItemsByCategory');
 Route::get('/getMainCategory', [ItemController::class, 'getMainCategory'])->name('getMainCategory');
-Route::get('/getItemById/{id}', [ItemController::class, 'getItemById'])->name('getItemById');
+Route::get('/getItemById/{itemId}', [ItemController::class, 'getItemById'])->name('getItemById');
 Route::post('/createItem', [ItemController::class, 'createItem'])->name('createItem');
 
+Route::post('/addToCart', [ItemController::class, 'addToCart'])->name('addToCart')->middleware('auth:api');
+Route::get('/viewUserCart', [ItemController::class, 'viewUserCart'])->name('viewUserCart')->middleware('auth:api');
+Route::delete('/removeItemFromCart', [ItemController::class, 'removeItemFromCart'])->name('removeItemFromCart')->middleware('auth:api');
 
 Route::post('/addToFavourites', [FavoriteController::class, 'addToFavourites'])->name('addToFavourites');
 Route::post('/getUserFavourite', [FavoriteController::class, 'getUserFavourite'])->name('getUserFavourite');
@@ -45,12 +51,12 @@ Route::post('/updateOffer{id}', [OfferController::class, 'updateOffer'])->name('
 Route::get('/getAllOffer', [OfferController::class, 'getAllOffer'])->name('getAllOffer');
 
 Route::post('sendNotification', action: [NotificationController::class, 'sendNotification']);
-Route::post('getUserNotification/{id}', action: [NotificationController::class, 'getUserNotification']);
+Route::get('getUserNotification/{id}', action: [NotificationController::class, 'getUserNotification']);
 Route::post('markNotificationAsRead/{id}/{nid}', action: [NotificationController::class, 'markNotificationAsRead']);
 
 Route::post('/createReview', [ReviewController::class, 'createReview'])->name('createReview')->middleware('auth:api');
 Route::get('getReview', action: [ReviewController::class, 'getReview']);
-Route::post('getItemReviews/{id}', action: [ReviewController::class, 'getItemReviews']);
+Route::post('getItemReviews/{itemId}', action: [ReviewController::class, 'getItemReviews']);
 Route::get('getItemRating/{id}', action: [ReviewController::class, 'getItemRating']);
 Route::get('getTopRated', action: [ReviewController::class, 'getTopRated']);
 

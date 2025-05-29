@@ -3,22 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ReviewResource;
 use App\Models\Item;
 use App\Models\Menu;
 use App\Models\Review;
 use App\Models\User;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Stmt\TryCatch;
 
 class ReviewController extends Controller
 {
     public function createReview(Request $request){
-         
+        $user = Auth::user();
         // add validation 
          $fields= Validator::make($request->all(),[
-          'user_id' => 'required|',
           'item_id'=> 'required',
           'rating'=> 'required|numeric|between:1,5',
           'review'=> 'required|max:255',
@@ -30,7 +31,7 @@ class ReviewController extends Controller
         }
    try {
     DB::table('reviews')->insert([
-       'user_id' =>  $request->user_id,
+       'user_id' =>  $user->id,
        'item_id' => $request->item_id,
        'rating' => $request->rating,
        'review' =>  $request->review
@@ -52,13 +53,15 @@ class ReviewController extends Controller
     public function getItemReviews($itemId)
 {
     $item = Item::with('reviews')->find($itemId);
-
+    $reviews = Review::find($itemId); 
+  
     if (!$item) {
         return response()->json(['message' => 'Item not found'], 404);
     }
-
-    return response()->json($item->reviews);
+     return new ReviewResource($reviews);
+     
 }  // must be for specific user  , done
+
 
     public function getItemRating($itemId)
 {

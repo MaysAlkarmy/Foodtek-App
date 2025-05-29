@@ -7,6 +7,7 @@ use App\Http\Resources\NotificationResource;
 use App\Models\User;
 use App\Notifications\GeneralNotification;
 use DB;
+use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -16,6 +17,9 @@ class NotificationController extends Controller
 
         $users = User::query()->get();
        // dd($users);
+       if(!$users){
+        return response()->json('no useres found');
+       }
         $newGeneralNotification = new GeneralNotification($request->get('title'), $request->get('content'), ['database']);
          Notification::send($users, $newGeneralNotification);
 
