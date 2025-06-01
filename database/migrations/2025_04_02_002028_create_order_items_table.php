@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade'); // مفتاح أجنبي لجدول الطلبات
-            $table->foreignId('item_id')->constrained('items')->onDelete('cascade'); // مفتاح أجنبي لجدول العناصر
-            $table->integer('quantity'); // الكمية
-            $table->decimal('price', 8, 2); // السعر
+            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade'); 
+            $table->foreignId('item_id')->constrained('items')->onDelete('cascade'); 
+            $table->integer('quantity'); 
+            $table->decimal('price', 8, 2);
             $table->timestamps();
         });
     }

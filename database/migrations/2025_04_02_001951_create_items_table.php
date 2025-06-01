@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); // المفتاح الأجنبي
-            $table->decimal('price', 8, 2); // السعر
-            $table->text('description')->nullable(); // الوصف
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade'); 
+            $table->decimal('price', 8, 2); 
+            $table->text('description')->nullable(); 
             $table->string('image')->nullable();
             $table->string('main_category');
             $table->timestamps();

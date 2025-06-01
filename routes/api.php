@@ -20,13 +20,13 @@ Route::get('/test', function () {
 });
 
 Route::apiResource('Users', UserController::class);
-Route::get('/',[AuthController::class,'index']);
-Route::post('/register',[AuthController::class,'register']);
-//Route::post('/forgotpassword',[AuthController::class,'forGotPassword']);
-Route::post('/login',[AuthController::class,'login']);
+Route::get('/',[UserController::class,'index']);
+Route::post('/register',[UserController::class,'register']);
+//Route::post('/forgotpassword',[UserController::class,'forGotPassword']);
+Route::post('/login',[UserController::class,'login']);
 
 Route::middleware('auth:sanctum')->group(function(){
-    Route::post("/logout", [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::post("/logout", [UserController::class, 'logout'])->middleware('auth:api');
 });
 Route::post('send\otp',[UserController::class,'sendResetLinkEmail']);
 Route::post('resetpass',[UserController::class,'resetPassword']);
@@ -40,9 +40,9 @@ Route::post('/addToCart', [ItemController::class, 'addToCart'])->name('addToCart
 Route::get('/viewUserCart', [ItemController::class, 'viewUserCart'])->name('viewUserCart')->middleware('auth:api');
 Route::delete('/removeItemFromCart', [ItemController::class, 'removeItemFromCart'])->name('removeItemFromCart')->middleware('auth:api');
 
-Route::post('/addToFavourites', [FavoriteController::class, 'addToFavourites'])->name('addToFavourites');
-Route::post('/getUserFavourite', [FavoriteController::class, 'getUserFavourite'])->name('getUserFavourite');
-Route::delete('/deleteUserFavourite', [FavoriteController::class, 'deleteUserFavourite'])->name('deleteUserFavourite');
+Route::post('/addToFavourites', [FavoriteController::class, 'addToFavourites'])->name('addToFavourites')->middleware('auth:api');
+Route::get('/getUserFavourite', [FavoriteController::class, 'getUserFavourite'])->name('getUserFavourite')->middleware('auth:api');
+Route::delete('/deleteUserFavourite', [FavoriteController::class, 'deleteUserFavourite'])->name('deleteUserFavourite')->middleware('auth:api');
 
 Route::get('/bannerImage', [BannerController::class, 'bannerImage'])->name('bannerImage');
 

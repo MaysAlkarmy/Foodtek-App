@@ -39,4 +39,10 @@ class User extends Authenticable
 {
     return $this->hasMany(Review::class);
 }
+
+public function favorites()
+{
+    return $this->belongsToMany(Item::class, 'favourites')->withTimestamps();
+}
+
 }
