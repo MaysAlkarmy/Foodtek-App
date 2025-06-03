@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OtpMail;
+use App\Models\Otp;
 use App\Models\User;
 use Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Stmt\TryCatch;
@@ -101,65 +104,89 @@ class UserController extends Controller
        ]);
     }
 
-    public function sendResetLinkEmail(Request $request)
+    public function sendOtp(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $user = Auth::user();
 
-    if (!$user) {
-        return response()->json(['message' => 'البريد الإلكتروني غير موجود'], 404);
-    }
-    // توليد رمز تحقق عشوائي
+         $fields= Validator::make($request->all(),[
+            'email'=> 'required|exists:users,email',
+          ]);
+
+          if($fields->fails()){
+              return response()->json($fields->errors());
+          }
+    //dd($request->email);
+    $email= $request->email;
+
     $otp = rand(100000, 999999);
-    // تخزينه في قاعدة البيانات (مثلاً في عمود otp)
-    $user->otp = $otp;
-    $user->save();
-    // إرسال الرمز إلى الإيميل
-    Mail::raw("رمز التحقق الخاص بك هو: $otp", function ($message) use ($user) {
-        $message->to($user->email)
-                ->subject('رمز التحقق لإعادة تعيين كلمة المرور');
-    });
 
-    return response()->json(['message' => 'تم إرسال رمز التحقق إلى البريد الإلكتروني']);
+    try {
+       // Store OTP in session or database with expiry time
+    Otp::where('email', $request->email)->delete();
+
+    // Save new OTP
+    Otp::create([
+        'email' => $request->email,
+        'otp' => $otp,
+        'expires_at' => now()->addMinutes(5),
+    ]);
+
+    Mail::raw("Your OTP is: $otp", function ($message) use ($email) {
+    $message->to($email)
+            ->subject('Your OTP Code');
+});
+
+    return response()->json(['message' => 'OTP sent successfully']); 
+
+    } catch (\Exception $exception) {
+            return response()->json(['error'=>$exception->getMessage()]);
+           }
+    
+    
 }
 
-public function verifyOtp(Request $request)
+public function resetPssword(Request $request)
 {
-    $request->validate([
-        'email' => 'required|email',
-        'otp' => 'required'
-    ]);
+     $fields= Validator::make($request->all(),[
 
-    $user = User::where('email', $request->email)
-                ->where('otp', $request->otp)
-                ->first();
+            'email'=> 'required|exists:users,email',
+            'otp' => 'required|digits:6',
+            'password' => 'required|min:6|confirmed',
+          ]);
 
-    if (!$user) {
-        return response()->json(['message' => 'رمز التحقق غير صحيح'], 400);
+          if($fields->fails()){
+              return response()->json($fields->errors());
+          }
+
+    $otpRecord = Otp::where('email', $request->email)
+                    ->where('otp', $request->otp)
+                    ->where('expires_at', '>', now())
+                    ->first();
+
+    if (!$otpRecord) {
+
+     return response()->json(['message' => 'Invalid or expired OTP'], 400);
+
     }
 
-    return response()->json(['message' => 'تم التحقق من الرمز بنجاح']);
-}
+   // Update password
+   try {
 
-public function resetPassword(Request $request)
-    { $request->validate([
-        'email' => 'required|email',
-        'otp' => 'required',
-        'new_password' => 'required|min:6'
-    ]);
-
-    $user = User::where('email', $request->email)
-                ->where('otp', $request->otp)
-                ->first();
-
-    if (!$user) {
-        return response()->json(['message' => 'البيانات غير صحيحة'], 400);
-    }
-
-    $user->password = Hash::make($request->new_password);
-    $user->otp = null; // حذف الرمز بعد الاستخدام
+    $user = User::where('email', $request->email)->first();
+    $user->password = Hash::make($request->password);
     $user->save();
+       // Optionally delete the OTP after use
+        $otpRecord->delete();
 
-    return response()->json(['message' => 'تمت إعادة تعيين كلمة المرور بنجاح']);;
+        return response()->json(['message' => 'password reset successful']);
+
+   }      catch (\Exception $exception) {
+            return response()->json(['error'=>$exception->getMessage()]);
+           }
+    
+    
     }
+
+
 
 }

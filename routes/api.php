@@ -28,8 +28,8 @@ Route::post('/login',[UserController::class,'login']);
 Route::middleware('auth:sanctum')->group(function(){
     Route::post("/logout", [UserController::class, 'logout'])->middleware('auth:api');
 });
-Route::post('send\otp',[UserController::class,'sendResetLinkEmail']);
-Route::post('resetpass',[UserController::class,'resetPassword']);
+Route::post('sendOtp',[UserController::class,'sendOtp']);
+Route::post('resetPssword',[UserController::class,'resetPssword']);
 
 Route::get('/getItemsByCategory', [ItemController::class, 'getItemsByCategory'])->name('getItemsByCategory');
 Route::get('/getMainCategory', [ItemController::class, 'getMainCategory'])->name('getMainCategory');
